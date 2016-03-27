@@ -23,7 +23,7 @@ export default class Chat extends Component {
       }, 100);
     }
   }
-
+  
   componentWillUnmount() {
     if (socket) {
       socket.removeListener('msg', this.onMessageReceived);
@@ -50,7 +50,7 @@ export default class Chat extends Component {
   }
 
   render() {
-    const style = require('./Chat.scss');
+    const style = require('./Play.scss');
     const {user} = this.props;
 
     return (

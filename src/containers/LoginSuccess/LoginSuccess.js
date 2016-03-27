@@ -13,11 +13,12 @@ class LoginSuccess extends Component {
   }
 
   render() {
+    // TODO: Check if user is logged in for the first time, if yes, show some introduction tips, if no, redirect to
+    // Play!
     const {user, logout} = this.props;
     return (user &&
       <div className="container">
         <h1>Login Success</h1>
-
         <div>
           <p>Hi, {user.name}. You have just successfully logged in, and were forwarded here
             by <code>componentWillReceiveProps()</code> in <code>App.js</code>, which is listening to
