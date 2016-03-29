@@ -23,7 +23,7 @@ export default class Chat extends Component {
       }, 100);
     }
   }
-  
+
   componentWillUnmount() {
     if (socket) {
       socket.removeListener('msg', this.onMessageReceived);
@@ -56,7 +56,6 @@ export default class Chat extends Component {
     return (
       <div className={style.chat + ' container'}>
         <h1 className={style}>Chat</h1>
-
         {user &&
         <div>
           <ul>
