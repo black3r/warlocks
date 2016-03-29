@@ -1,0 +1,12 @@
+import mongoose from 'mongoose';
+
+const userSchema = mongoose.Schema({
+  username: String,
+  email: String,
+  auth: [{
+    type: String,
+    value: String
+  }]
+});
+
+export const User = mongoose.model('User', userSchema);
