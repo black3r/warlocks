@@ -17,6 +17,7 @@ const REGISTER_FAIL = 'warlocks/auth/REGISTER_FAIL';
 const initialState = {
   loaded: false,
   loginError: null,
+  registerError: null,
 };
 
 export default function reducer(state = initialState, action = {}) {
@@ -59,6 +60,25 @@ export default function reducer(state = initialState, action = {}) {
         loggingIn: false,
         user: null,
         loginError: action.error
+      };
+    case REGISTER:
+      return {
+        ...state,
+        registering: true,
+        registerError: false,
+      };
+    case REGISTER_SUCCESS:
+      return {
+        ...state,
+        registering: true,
+        registerError: null,
+        user: action.result,
+      };
+    case REGISTER_FAIL:
+      return {
+        ...state,
+        registering: true,
+        registerError: action.error
       };
     case LOGOUT:
       return {
@@ -106,6 +126,25 @@ export function login(name, password) {
         throw data.error;
       } else {
         return data.result;
+      }
+    })
+  };
+}
+
+export function register(name, email, password) {
+  return {
+    types: [REGISTER, REGISTER_SUCCESS, REGISTER_FAIL],
+    promise: (client) => client.post('/auth/register/', {
+      data: {
+        username: name,
+        email: email,
+        password: password
+      }
+    }).then((data) => {
+      if (data.response === 'error') {
+        throw data.msg;
+      } else {
+        return data.msg;
       }
     })
   };

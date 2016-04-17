@@ -75,6 +75,7 @@ db.once('open', () => {
 
   app.post('/auth/register/', (req, res) => {
     const {username, email, password} = req.body;
+    console.log(username, email, password);
     register(username, email, password).then(data => res.json(data));
   });
 

@@ -1,19 +1,20 @@
 import React, {Component, PropTypes} from 'react';
+
 import {connect} from 'react-redux';
 import Helmet from 'react-helmet';
-import { Link } from 'react-router';
 import * as authActions from 'redux/modules/auth';
 
 @connect(
   state => ({
     user: state.auth.user,
-    loginError: state.auth.loginError
+    registerError: state.auth.registerError
   }),
   authActions)
-export default class Login extends Component {
+export default class Register extends Component {
   static propTypes = {
     user: PropTypes.object,
-    loginError: PropTypes.string,
+    register: PropTypes.func,
+    registerError: PropTypes.string,
     login: PropTypes.func,
     logout: PropTypes.func
   };
@@ -21,38 +22,44 @@ export default class Login extends Component {
   handleSubmit = (event) => {
     event.preventDefault();
     const input = this.refs.username;
+    const emailInput = this.refs.email;
     const passwordInput = this.refs.password;
-    this.props.login(input.value, passwordInput.value);
+    this.props.register(input.value, emailInput.value, passwordInput.value);
     input.value = '';
+    emailInput.value = '';
     passwordInput.value = '';
   };
 
   render() {
     const {user, logout} = this.props;
-    const styles = require('./Login.scss');
+    const styles = require('./Register.scss');
     return (
       <div className={styles.loginPage + ' container'}>
-        <Helmet title="Login"/>
-        <h1>Login</h1>
+        <Helmet title="Register"/>
+        <h1>Register</h1>
         {!user &&
         <div>
-          <form className="login-form form-inline" onSubmit={this.handleSubmit}>
-            <h3>Login with a password</h3>
-            { this.props.loginError &&
+          <form className="login-form col-lg-4 col-md-6 col-sm-12" onSubmit={this.handleSubmit}>
+            <h3>Register an account</h3>
+            { this.props.registerError &&
               <div className="alert alert-danger">
-                {this.props.loginError || null}
+                {this.props.registerError || null}
               </div>
             }
             <div className="form-group">
               <input type="text" ref="username" placeholder="Enter a username" className="form-control"/>
+            </div>
+            <div className="form-group">
+              <input type="email" ref="email" placeholder="Enter an email" className="form-control"/>
+            </div>
+            <div className="form-group">
               <input type="password" ref="password" placeholder="Password" className="form-control"/>
             </div>
-            <button className="btn btn-success" onClick={this.handleSubmit}><i className="fa fa-sign-in"/>{' '}Log In
-            </button>
-            <p className="register-p">
-              Don't have an account? You can register one <Link to="/register/">here</Link>!
-            </p>
-            <h3>Login with social account</h3>
+            <div className="form-group">
+              <button className="btn btn-success" onClick={this.handleSubmit}><i className="fa fa-sign-in"/>
+                {' '}Register
+              </button>
+            </div>
           </form>
         </div>
         }
