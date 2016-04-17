@@ -6,10 +6,10 @@ const gameSchema = mongoose.Schema({
     players: [String],
     moves: [{
       player: String,
-      type: String,
+      moveType: String,
       coordinates: [Number],
       time: Number,
-      type: String
+      attackType: String
     }]
   }],
   roundCount: Number,

@@ -2,8 +2,6 @@ import mongoose from 'mongoose';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
-
-const { should, expect } = chai;
 chai.should();
 
 import { createLobby } from '../actions/createLobby';
@@ -46,7 +44,7 @@ describe('lobby backend', () => {
   );
 
   it("should start lobby", () =>
-    startLobby().should.eventually.be.ok
+    startLobby("lobby").should.eventually.be.ok
   );
 
   it("should get lobby", () =>
@@ -56,5 +54,5 @@ describe('lobby backend', () => {
       lobby.should.have.property('msg');
       lobby.msg.should.eql(data.msg);
     }))
-  )
+  );
 });

@@ -9,27 +9,27 @@ export function login(username, password) {
       return {
         result: null,
         error: "Incorrect username"
-      }
-    } else {
-      const passHash = user.getAuth('local');
-      if (!passHash) {
+      };
+    }
+
+    const passHash = user.getAuth('local');
+    if (!passHash) {
+      return {
+        result: null,
+        error: "This user account does not support password-based login"
+      };
+    }
+
+    return verify(password, passHash).then((res) => {
+      if (!res) {
         return {
           result: null,
-          error: "This user account does not support password-based login"
+          error: "Incorrect password!"
         };
       }
-
-      return verify(password, passHash).then((res) => {
-        if (!res) {
-          return {
-            result: null,
-            error: "Incorrect password!"
-          };
-        }
-        return {
-          result: user
-        }
-      })
-    }
+      return {
+        result: user
+      };
+    });
   });
 }

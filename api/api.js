@@ -43,20 +43,20 @@ db.once('open', () => {
     login(username, password).then((response) => done(response.error, response.result, null));
   }));
 
-  app.post('/auth/login/', (req, res, next) => passport.authenticate('local', (err, user, info) => {
-    if (err) {
+  app.post('/auth/login/', (req, res, next) => passport.authenticate('local', (dbErr, user) => {
+    if (dbErr) {
       res.json({
         result: null,
-        error: err,
+        error: dbErr,
       });
     } else {
-      req.logIn(user, (err) => {
+      req.logIn(user, (loginErr) => {
         res.json({
           result: {
             username: user.username,
             email: user.email
           },
-          error: err
+          error: loginErr
         });
       });
     }
@@ -75,6 +75,7 @@ db.once('open', () => {
 
   app.post('/auth/register/', (req, res) => {
     const {username, email, password} = req.body;
+    console.log(username, email, password);
     register(username, email, password).then(data => res.json(data));
   });
 

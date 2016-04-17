@@ -2,8 +2,6 @@ import mongoose from 'mongoose';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
-
-const { should, expect } = chai;
 chai.should();
 
 import { register } from '../actions/register';
@@ -28,7 +26,7 @@ describe('login backend', () => {
 
   it("shouldn't be able to login with non-existent user", () =>
     login('tester', 'password').then((data) => {
-      data.should.have.property('error', 'Incorrect username')
+      data.should.have.property('error', 'Incorrect username');
     })
   );
 
@@ -61,6 +59,5 @@ describe('login backend', () => {
         data.result.should.have.property('email', 'tester@example.com');
       })
   );
-
 });
 

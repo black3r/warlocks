@@ -2,8 +2,6 @@ import { hash, verify } from '../utils/password';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
-
-const { should, expect } = chai;
 chai.should();
 
 describe('password hasher', () => {

@@ -9,11 +9,13 @@ const userSchema = mongoose.Schema({
   }]
 });
 
-userSchema.methods.getAuth = function(type) {
+userSchema.methods.getAuth = function getAuth(type) {
   for (const authIndex in this.auth) {
-    const auth = this.auth[authIndex];
-    if (auth.authType === type) {
-      return auth.value;
+    if (this.auth.hasOwnProperty(authIndex)) {
+      const auth = this.auth[authIndex];
+      if (auth.authType === type) {
+        return auth.value;
+      }
     }
   }
   return null;

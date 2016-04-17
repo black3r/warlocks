@@ -39,7 +39,7 @@ export function isLoaded(globalState) {
 export function load() {
   return {
     types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
-    promise: (client) => Promise.resolve({
+    promise: () => Promise.resolve({
       message: 'This came from server',
       time: Date.now()
     })

@@ -2,8 +2,6 @@ import mongoose from 'mongoose';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
-
-const { should, expect } = chai;
 chai.should();
 
 import { register } from '../actions/register';
@@ -49,6 +47,6 @@ describe('register backend', () => {
       data.should.have.property('msg');
       data.msg.username.should.be.equal('tester');
       data.msg.email.should.be.equal('tester@example.com');
-    })
+    });
   });
 });
