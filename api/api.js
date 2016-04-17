@@ -78,6 +78,11 @@ db.once('open', () => {
     register(username, email, password).then(data => res.json(data));
   });
 
+  app.post('/auth/logout/', (req, res) => {
+    req.logout();
+    res.json({});
+  });
+
   const bufferSize = 100;
   const messageBuffer = new Array(bufferSize);
   let messageIndex = 0;
