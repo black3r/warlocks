@@ -8,6 +8,7 @@ import NavItem from 'react-bootstrap/lib/NavItem';
 import Helmet from 'react-helmet';
 import { isLoaded as isInfoLoaded, load as loadInfo } from 'redux/modules/info';
 import { isLoaded as isAuthLoaded, load as loadAuth, logout } from 'redux/modules/auth';
+import { isLoaded as isLobbyLoaded, load as loadLobby } from 'redux/modules/lobby';
 import { routeActions } from 'react-router-redux';
 import config from '../../config';
 import { asyncConnect } from 'redux-async-connect';
@@ -21,6 +22,9 @@ import { asyncConnect } from 'redux-async-connect';
     }
     if (!isAuthLoaded(getState())) {
       promises.push(dispatch(loadAuth()));
+    }
+    if (!isLobbyLoaded(getState())) {
+      promises.push(dispatch(loadLobby()));
     }
 
     return Promise.all(promises);

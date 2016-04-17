@@ -29,14 +29,14 @@ export default function lobby(state = initialState, action = {}) {
         ...state,
         loading: false,
         loaded: true,
-        data: action.result,
+        list: action.result,
       };
     case LOBBY_LIST_LOAD_FAIL:
       return {
         ...state,
         loading: false,
         loaded: false,
-        data: action.error,
+        list: null,
       };
 
     case CREATE_LOBBY:

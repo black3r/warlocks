@@ -11,6 +11,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { User } from './models/user';
 import { login } from './actions/login';
 import { register } from './actions/register';
+import { getLobbyList } from './actions/getLobbyList';
 
 const pretty = new PrettyError();
 const app = express();
@@ -82,6 +83,10 @@ db.once('open', () => {
   app.post('/auth/logout/', (req, res) => {
     req.logout();
     res.json({});
+  });
+
+  app.get('/lobby/list/', (req, res) => {
+    getLobbyList().then((data) => res.json(data));
   });
 
   const bufferSize = 100;
