@@ -11,15 +11,17 @@ export default class Login extends Component {
     user: PropTypes.object,
     login: PropTypes.func,
     logout: PropTypes.func
-  }
+  };
 
   handleSubmit = (event) => {
     event.preventDefault();
     const input = this.refs.username;
-    this.props.login(input.value);
+    const passwordInput = this.refs.password;
+    this.props.login(input.value, passwordInput.value);
     input.value = '';
-  }
-
+    passwordInput.value = '';
+  };
+  
   render() {
     const {user, logout} = this.props;
     const styles = require('./Login.scss');
@@ -30,13 +32,15 @@ export default class Login extends Component {
         {!user &&
         <div>
           <form className="login-form form-inline" onSubmit={this.handleSubmit}>
+            <h3>Login with a password</h3>
             <div className="form-group">
               <input type="text" ref="username" placeholder="Enter a username" className="form-control"/>
+              <input type="password" ref="password" placeholder="Password" className="form-control"/>
             </div>
             <button className="btn btn-success" onClick={this.handleSubmit}><i className="fa fa-sign-in"/>{' '}Log In
             </button>
+            <h3>Login with social account</h3>
           </form>
-          <p>This will "log you in" as this user, storing the username in the session of the API server.</p>
         </div>
         }
         {user &&

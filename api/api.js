@@ -2,13 +2,15 @@ import express from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
 import config from '../src/config';
-import * as actions from './actions/index';
-import {mapUrl} from 'utils/url.js';
 import PrettyError from 'pretty-error';
 import http from 'http';
 import SocketIo from 'socket.io';
 import mongoose from 'mongoose';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
 import { User } from './models/user';
+import { login } from './actions/login';
+import { register } from './actions/register';
 
 const pretty = new PrettyError();
 const app = express();
@@ -31,34 +33,50 @@ db.once('open', () => {
     cookie: { maxAge: 60000 }
   }));
   app.use(bodyParser.json());
+  app.use(passport.initialize());
+  app.use(passport.session());
 
+  passport.serializeUser((user, done) => done(null, user._id));
+  passport.deserializeUser((user, done) => User.findOne({_id: user}).exec().then((result) => done(null, result)).catch((err) => done(err)));
 
-  app.use((req, res) => {
-    const splittedUrlPath = req.url.split('?')[0].split('/').slice(1);
+  passport.use(new LocalStrategy((username, password, done) => {
+    login(username, password).then((response) => done(response.error, response.result, null));
+  }));
 
-    const {action, params} = mapUrl(actions, splittedUrlPath);
-
-    if (action) {
-      action(req, params)
-        .then((result) => {
-          if (result instanceof Function) {
-            result(res);
-          } else {
-            res.json(result);
-          }
-        }, (reason) => {
-          if (reason && reason.redirect) {
-            res.redirect(reason.redirect);
-          } else {
-            console.error('API ERROR:', pretty.render(reason));
-            res.status(reason.status || 500).json(reason);
-          }
-        });
+  app.post('/auth/login/', (req, res, next) => passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      res.json({
+        result: null,
+        error: err,
+      });
     } else {
-      res.status(404).end('NOT FOUND');
+      req.logIn(user, (err) => {
+        res.json({
+          result: {
+            username: user.username,
+            email: user.email
+          },
+          error: err
+        });
+      });
+    }
+  })(req, res, next));
+
+  app.get('/loadAuth/', (req, res) => {
+    if (req.isAuthenticated()) {
+      res.json({
+        username: req.user.username,
+        email: req.user.email,
+      });
+    } else {
+      res.json(null);
     }
   });
 
+  app.post('/auth/register/', (req, res) => {
+    const {username, email, password} = req.body;
+    register(username, email, password).then(data => res.json(data));
+  });
 
   const bufferSize = 100;
   const messageBuffer = new Array(bufferSize);
