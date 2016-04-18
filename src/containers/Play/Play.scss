@@ -4,6 +4,12 @@
     border-radius: 5px;
     border: 1px solid #ccc;
   }
+  .lobbyinput {
+    display: inline;
+    input {
+      width: auto;
+    }
+  }
   form {
     margin: 30px 0;
     :global(.btn) {

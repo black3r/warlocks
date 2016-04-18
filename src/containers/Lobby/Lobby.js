@@ -12,7 +12,7 @@ import { Grid, Row, Col, Table, Button } from 'react-bootstrap';
 export default class Lobby extends Component {
   static propTypes = {
     user: PropTypes.object,
-    selectedLobby: PropTypes.string,
+    selectedLobby: PropTypes.object,
   };
 
   componentDidMount() {

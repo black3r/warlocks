@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import * as lobbyActions from 'redux/modules/lobby';
-import { Grid, Row, Table, Button } from 'react-bootstrap';
+import { Grid, Row, Table, Button, Input } from 'react-bootstrap';
 import { routeActions } from 'react-router-redux';
 
 @connect(
@@ -18,13 +18,14 @@ export default class Chat extends Component {
   static propTypes = {
     user: PropTypes.object,
     lobbyList: PropTypes.array,
-    selectedLobby: PropTypes.string,
+    selectedLobby: PropTypes.object,
     selectLobby: PropTypes.func.isRequired,
     createLobby: PropTypes.func.isRequired,
     pushState: PropTypes.func.isRequired,
   };
 
   state = {
+    inputValue: '',
     message: '',
     messages: []
   };
@@ -56,7 +57,7 @@ export default class Chat extends Component {
     const messages = this.state.messages;
     messages.push(data);
     this.setState({messages});
-  }
+  };
 
   handleSubmit = (event) => {
     event.preventDefault();
@@ -69,10 +70,14 @@ export default class Chat extends Component {
       from: this.props.user.name,
       text: msg
     });
-  }
+  };
 
+  handleLobbyNameChange = (event) =>
+    this.setState({
+      inputValue: event.target.value,
+    });
 
-  handleCreateLobby = (name) => () => this.props.createLobby(name);
+  handleCreateLobby = () => this.props.createLobby(this.state.inputValue);
   handleJoinLobby = (lobbyId) => () => this.props.selectLobby(lobbyId);
 
   render() {
@@ -113,7 +118,8 @@ export default class Chat extends Component {
           </Table>
         </Row>
         <Row>
-          <Button onClick={this.handleCreateLobby('lobby')}>
+          <Input className={style.lobbyinput} type="text" onChange={this.handleLobbyNameChange} value={this.state.inputValue} />
+          <Button onClick={this.handleCreateLobby}>
             Create Lobby
           </Button>
         </Row>
