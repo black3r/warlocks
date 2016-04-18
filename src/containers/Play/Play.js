@@ -22,21 +22,17 @@ export default class Chat extends Component {
     selectLobby: PropTypes.func.isRequired,
     createLobby: PropTypes.func.isRequired,
     pushState: PropTypes.func.isRequired,
+    load: PropTypes.func.isRequired,
   };
 
   state = {
     inputValue: '',
-    message: '',
-    messages: []
   };
 
   componentDidMount() {
-    if (socket) {
-      socket.on('msg', this.onMessageReceived);
-      setTimeout(() => {
-        socket.emit('history', {offset: 0, length: 100});
-      }, 100);
-    }
+    this.timeout = setInterval(() => {
+      this.props.load();
+    }, 1000);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -46,31 +42,12 @@ export default class Chat extends Component {
   }
 
   componentWillUnmount() {
-    if (socket) {
-      socket.removeListener('msg', this.onMessageReceived);
+    if (this.timeout) {
+      clearInterval(this.timeout);
     }
   }
 
-  // TODO: This is kept here as an example of socket communication,
-  // This will be reused in in-lobby screen.
-  onMessageReceived = (data) => {
-    const messages = this.state.messages;
-    messages.push(data);
-    this.setState({messages});
-  };
-
-  handleSubmit = (event) => {
-    event.preventDefault();
-
-    const msg = this.state.message;
-
-    this.setState({message: ''});
-
-    socket.emit('msg', {
-      from: this.props.user.name,
-      text: msg
-    });
-  };
+  timeout = null;
 
   handleLobbyNameChange = (event) =>
     this.setState({

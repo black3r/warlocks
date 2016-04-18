@@ -13,6 +13,7 @@ export default class Lobby extends Component {
   static propTypes = {
     user: PropTypes.object,
     selectedLobby: PropTypes.object,
+    selectLobby: PropTypes.func.isRequired,
   };
 
   componentDidMount() {
@@ -24,6 +25,11 @@ export default class Lobby extends Component {
         lobby: this.props.selectedLobby._id,
       });
     }
+    this.timeout = setInterval(() => {
+      if (this.props.selectedLobby) {
+        this.props.selectLobby(this.props.selectedLobby._id);
+      }
+    }, 1000);
   }
 
   componentWillUnmount() {
@@ -34,7 +40,12 @@ export default class Lobby extends Component {
         lobby: this.props.selectedLobby._id,
       });
     }
+    if (this.timeout) {
+      clearInterval(this.timeout);
+    }
   }
+
+  timeout = null;
 
   // TODO: iba prvy hrac (Vlastnik lobby) moze zacat hru
   render() {

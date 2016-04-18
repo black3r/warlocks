@@ -66,7 +66,6 @@ export default function lobby(state = initialState, action = {}) {
         ...state,
         selecting: true,
         selectError: null,
-        selected: null,
       };
     case GET_LOBBY_SUCCESS:
       return {
