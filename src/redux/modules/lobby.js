@@ -108,9 +108,11 @@ export function createLobby(name) {
   return {
     types: [CREATE_LOBBY, CREATE_LOBBY_SUCCESS, CREATE_LOBBY_FAIL],
     promise: (client) => client.post('/lobby/create/', {
-      name: name
+      data: {
+        name: name
+      }
     }).then((data) => {
-      if (!(data.response !== 'success')) {
+      if (data.response !== 'success') {
         throw data.msg;
       } else {
         return data.msg;

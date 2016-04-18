@@ -20,6 +20,7 @@ export default class Chat extends Component {
     lobbyList: PropTypes.array,
     selectedLobby: PropTypes.string,
     selectLobby: PropTypes.func.isRequired,
+    createLobby: PropTypes.func.isRequired,
     pushState: PropTypes.func.isRequired,
   };
 
@@ -71,10 +72,7 @@ export default class Chat extends Component {
   }
 
 
-  handleCreateLobby = (event) => {
-
-  }
-
+  handleCreateLobby = (name) => () => this.props.createLobby(name);
   handleJoinLobby = (lobbyId) => () => this.props.selectLobby(lobbyId);
 
   render() {
@@ -113,6 +111,11 @@ export default class Chat extends Component {
             ))}
             </tbody>
           </Table>
+        </Row>
+        <Row>
+          <Button onClick={this.handleCreateLobby('lobby')}>
+            Create Lobby
+          </Button>
         </Row>
       </Grid>
     );

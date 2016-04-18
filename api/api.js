@@ -92,14 +92,13 @@ db.once('open', () => {
   });
 
   app.post('/lobby/get/', (req, res) => {
-    console.log(req.body);
     const {id} = req.body;
-    console.log(id);
     getLobby(id).then((data) => res.json(data));
   });
 
   app.post('/lobby/create/', (req, res) => {
-    createLobby().then((data) => res.json(data));
+    const {name} = req.body;
+    createLobby(name).then((data) => res.json(data));
   });
 
   const bufferSize = 100;
