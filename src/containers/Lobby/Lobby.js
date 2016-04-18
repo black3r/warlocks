@@ -18,10 +18,22 @@ export default class Lobby extends Component {
   componentDidMount() {
     // Load lobby information
     // subscribe to the lobby
+    if (socket) {
+      socket.emit('joined lobby', {
+        user: this.props.user.username,
+        lobby: this.props.selectedLobby._id,
+      });
+    }
   }
 
   componentWillUnmount() {
     // unsubscribe from the lobby
+    if (socket) {
+      socket.emit('removed from lobby', {
+        user: this.props.user.username,
+        lobby: this.props.selectedLobby._id,
+      });
+    }
   }
 
   // TODO: iba prvy hrac (Vlastnik lobby) moze zacat hru

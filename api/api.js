@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { User } from './models/user';
+import { Lobby } from './models/lobby';
 import { login } from './actions/login';
 import { register } from './actions/register';
 import { getLobbyList } from './actions/getLobbyList';
@@ -78,7 +79,6 @@ db.once('open', () => {
 
   app.post('/auth/register/', (req, res) => {
     const {username, email, password} = req.body;
-    console.log(username, email, password);
     register(username, email, password).then(data => res.json(data));
   });
 
@@ -114,8 +114,52 @@ db.once('open', () => {
       console.info('==> 💻  Send requests to http://%s:%s', config.apiHost, config.apiPort);
     });
 
+    const userSocketMap = {};
+    const userLobbyMap = {};
+
     io.on('connection', (socket) => {
       socket.emit('news', {msg: `'Hello World!' from server`});
+
+      socket.on('joined lobby', (data) => {
+        // TODO: handle if user joins twice (don't allow it, throw error into GUI)
+        const { user, lobby } = data;
+        userSocketMap[user] = socket;
+        userLobbyMap[user] = lobby;
+        Lobby.findOne({
+          _id: lobby
+        }).exec().then((obj) => {
+          obj.players.push(user);
+          obj.save();
+        });
+      });
+
+      const clearUser = (user, lobby) => {
+        delete userSocketMap[user];
+        delete userLobbyMap[user];
+        Lobby.findOne({
+          _id: lobby
+        }).exec().then((obj) => {
+          const index = obj.players.indexOf(user);
+          if (index !== -1) {
+            obj.players.splice(index, 1);
+            obj.save();
+          }
+        });
+      };
+
+      socket.on('removed from lobby', (data) => {
+        const { user, lobby } = data;
+        clearUser(user, lobby);
+      });
+
+      socket.on('disconnect', () => {
+        const keys = Object.keys(userSocketMap).filter(key => userSocketMap[key] === socket);
+        if (keys.length) {
+          const user = keys[0];
+          const lobby = userLobbyMap[user];
+          clearUser(user, lobby);
+        }
+      });
 
       socket.on('history', () => {
         for (let index = 0; index < bufferSize; index++) {
