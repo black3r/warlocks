@@ -48,7 +48,7 @@ export default class App extends Component {
   componentWillReceiveProps(nextProps) {
     if (!this.props.user && nextProps.user) {
       // login
-      this.props.pushState('/loginSuccess');
+      this.props.pushState('/play');
     } else if (this.props.user && !nextProps.user) {
       // logout
       this.props.pushState('/');
@@ -101,7 +101,7 @@ export default class App extends Component {
             </Nav>
             <Nav navbar pullRight>
               {user &&
-              <p className={styles.loggedInMessage + ' navbar-text'}>Logged in as <strong>{user.name}</strong>.</p>}
+              <p className={styles.loggedInMessage + ' navbar-text'}>Logged in as <strong>{user.username}</strong>.</p>}
             </Nav>
           </Navbar.Collapse>
         </Navbar>

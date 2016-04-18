@@ -2,19 +2,25 @@ import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import * as lobbyActions from 'redux/modules/lobby';
 import { Grid, Row, Table, Button } from 'react-bootstrap';
+import { routeActions } from 'react-router-redux';
 
 @connect(
   state => ({
     user: state.auth.user,
     lobbyList: state.lobby.list,
     selectedLobby: state.lobby.selected,
-  }), lobbyActions
+  }), {
+    ...lobbyActions,
+    pushState: routeActions.push
+  }
 )
 export default class Chat extends Component {
   static propTypes = {
     user: PropTypes.object,
     lobbyList: PropTypes.array,
-    selectedLobby: PropTypes.string
+    selectedLobby: PropTypes.string,
+    selectLobby: PropTypes.func.isRequired,
+    pushState: PropTypes.func.isRequired,
   };
 
   state = {
@@ -28,6 +34,12 @@ export default class Chat extends Component {
       setTimeout(() => {
         socket.emit('history', {offset: 0, length: 100});
       }, 100);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!this.props.selectedLobby && nextProps.selectedLobby) {
+      this.props.pushState('/lobby');
     }
   }
 
@@ -63,9 +75,7 @@ export default class Chat extends Component {
 
   }
 
-  handleJoinLobby = (event) => {
-
-  }
+  handleJoinLobby = (lobbyId) => () => this.props.selectLobby(lobbyId);
 
   render() {
     const style = require('./Play.scss');
@@ -77,7 +87,7 @@ export default class Chat extends Component {
           <h1>Room list</h1>
         </Row>
         <Row>
-          <Table stripped bordered>
+          <Table striped bordered>
             <thead>
               <tr>
                 <th>
@@ -96,7 +106,7 @@ export default class Chat extends Component {
               <tr key={room._id}>
                 <td>{room.name}</td>
                 <td>{room.players.length}</td>
-                <td><Button bsStyle="primary">
+                <td><Button bsStyle="primary" onClick={this.handleJoinLobby(room._id)}>
                   join
                 </Button></td>
               </tr>

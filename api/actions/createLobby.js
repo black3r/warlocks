@@ -8,7 +8,8 @@ export function createLobby(lobbyName) {
     response: 'success',
     msg: {
       _id: data._id,
-      name: data.name
+      name: data.name,
+      players: data.players,
     }
   }));
 }

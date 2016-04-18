@@ -12,6 +12,8 @@ import { User } from './models/user';
 import { login } from './actions/login';
 import { register } from './actions/register';
 import { getLobbyList } from './actions/getLobbyList';
+import { getLobby } from './actions/getLobby';
+import { createLobby } from './actions/createLobby';
 
 const pretty = new PrettyError();
 const app = express();
@@ -87,6 +89,17 @@ db.once('open', () => {
 
   app.get('/lobby/list/', (req, res) => {
     getLobbyList().then((data) => res.json(data));
+  });
+
+  app.post('/lobby/get/', (req, res) => {
+    console.log(req.body);
+    const {id} = req.body;
+    console.log(id);
+    getLobby(id).then((data) => res.json(data));
+  });
+
+  app.post('/lobby/create/', (req, res) => {
+    createLobby().then((data) => res.json(data));
   });
 
   const bufferSize = 100;

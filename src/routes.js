@@ -4,6 +4,7 @@ import { isLoaded as isAuthLoaded, load as loadAuth } from 'redux/modules/auth';
 import {
     App,
     Play,
+    Lobby,
     Home,
     About,
     Login,
@@ -41,6 +42,7 @@ export default (store) => {
       { /* Routes requiring login */ }
       <Route onEnter={requireLogin}>
         <Route path="play" component={Play}/>
+        <Route path="lobby" component={Lobby} />
         <Route path="loginSuccess" component={LoginSuccess}/>
       </Route>
 

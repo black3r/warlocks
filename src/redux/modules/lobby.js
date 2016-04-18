@@ -122,8 +122,10 @@ export function createLobby(name) {
 export function selectLobby(id) {
   return {
     types: [GET_LOBBY, GET_LOBBY_SUCCESS, GET_LOBBY_FAIL],
-    promise: (client) => client.get('/lobby/get/', {
-      id: id
+    promise: (client) => client.post('/lobby/get/', {
+      data: {
+        id: id
+      }
     }).then((data) => {
       if (data.response !== 'success') {
         throw data.msg;
