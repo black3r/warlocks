@@ -4,6 +4,7 @@ export Home from './Home/Home';
 export About from './About/About';
 export Login from './Login/Login';
 export Lobby from './Lobby/Lobby';
+export InGame from './InGame/InGame';
 export Register from './Register/Register';
 export LoginSuccess from './LoginSuccess/LoginSuccess';
 export NotFound from './NotFound/NotFound';

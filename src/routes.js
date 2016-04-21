@@ -5,6 +5,7 @@ import {
     App,
     Play,
     Lobby,
+    InGame,
     Home,
     About,
     Login,
@@ -43,6 +44,7 @@ export default (store) => {
       <Route onEnter={requireLogin}>
         <Route path="play" component={Play}/>
         <Route path="lobby" component={Lobby} />
+        <Route path="game" component={InGame} />
         <Route path="loginSuccess" component={LoginSuccess}/>
       </Route>
 
