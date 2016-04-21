@@ -49,6 +49,8 @@ export default class Lobby extends Component {
 
   // TODO: iba prvy hrac (Vlastnik lobby) moze zacat hru
   render() {
+    const enabled = this.props.selectedLobby.players.length && this.props.selectedLobby.players[0] === this.props.user.username;
+
     return (
       <Grid>
         <Row>
@@ -72,7 +74,10 @@ export default class Lobby extends Component {
           </Col>
         </Row>
         <Row>
-          <Button bsStyle="primary">
+          <Button
+            bsStyle="primary"
+            disabled={ !enabled }
+          >
             Start game
           </Button>
         </Row>
