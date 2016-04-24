@@ -81,12 +81,12 @@ db.once('open', () => {
     const {username, email, password} = req.body;
     register(username, email, password).then(data => res.json(data));
   });
-
+  
   app.post('/auth/logout/', (req, res) => {
     req.logout();
     res.json({});
   });
-
+  
   app.get('/lobby/list/', (req, res) => {
     getLobbyList().then((data) => res.json(data));
   });
@@ -95,7 +95,7 @@ db.once('open', () => {
     const {id} = req.body;
     getLobby(id).then((data) => res.json(data));
   });
-
+  
   app.post('/lobby/create/', (req, res) => {
     const {name} = req.body;
     createLobby(name).then((data) => res.json(data));
@@ -113,13 +113,13 @@ db.once('open', () => {
       console.info('----\n==> 🌎  API is running on port %s', config.apiPort);
       console.info('==> 💻  Send requests to http://%s:%s', config.apiHost, config.apiPort);
     });
-
+    
     const userSocketMap = {};
     const userLobbyMap = {};
-
+    
     io.on('connection', (socket) => {
       socket.emit('news', {msg: `'Hello World!' from server`});
-
+      
       socket.on('joined lobby', (data) => {
         // TODO: handle if user joins twice (don't allow it, throw error into GUI)
         const { user, lobby } = data;
