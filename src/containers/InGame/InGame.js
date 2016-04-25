@@ -17,7 +17,25 @@ export default class InGame extends Component {
   };
 
   componentDidMount() {
-    // posle sa connect message
+    const Phaser = window.Phaser;
+
+    function preload() {
+      game.load.image('sky', 'assets/sky.png');
+    }
+
+    function create() {
+
+    }
+
+    function update() {
+
+    }
+
+    const game = new Phaser.Game(800, 600, Phaser.AUTO, 'ingame_screen', {
+      preload: preload,
+      create: create,
+      update: update
+    });
   }
 
   componentWillUnmount() {
@@ -30,6 +48,7 @@ export default class InGame extends Component {
       <Grid>
         <Row>
           <h1>Game: #ID</h1>
+          <div id="ingame_screen" />
         </Row>
       </Grid>
     );
