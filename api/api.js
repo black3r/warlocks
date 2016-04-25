@@ -15,6 +15,7 @@ import { register } from './actions/register';
 import { getLobbyList } from './actions/getLobbyList';
 import { getLobby } from './actions/getLobby';
 import { createLobby } from './actions/createLobby';
+import { startLobby } from "./actions/startLobby";
 
 const pretty = new PrettyError();
 const app = express();
@@ -81,12 +82,12 @@ db.once('open', () => {
     const {username, email, password} = req.body;
     register(username, email, password).then(data => res.json(data));
   });
-  
+
   app.post('/auth/logout/', (req, res) => {
     req.logout();
     res.json({});
   });
-  
+
   app.get('/lobby/list/', (req, res) => {
     getLobbyList().then((data) => res.json(data));
   });
@@ -95,7 +96,7 @@ db.once('open', () => {
     const {id} = req.body;
     getLobby(id).then((data) => res.json(data));
   });
-  
+
   app.post('/lobby/create/', (req, res) => {
     const {name} = req.body;
     createLobby(name).then((data) => res.json(data));
@@ -113,13 +114,13 @@ db.once('open', () => {
       console.info('----\n==> 🌎  API is running on port %s', config.apiPort);
       console.info('==> 💻  Send requests to http://%s:%s', config.apiHost, config.apiPort);
     });
-    
+
     const userSocketMap = {};
     const userLobbyMap = {};
-    
+
     io.on('connection', (socket) => {
       socket.emit('news', {msg: `'Hello World!' from server`});
-      
+
       socket.on('joined lobby', (data) => {
         // TODO: handle if user joins twice (don't allow it, throw error into GUI)
         const { user, lobby } = data;
@@ -131,6 +132,25 @@ db.once('open', () => {
           obj.players.push(user);
           obj.save();
         });
+      });
+
+      socket.on('lobby start', (data) => {
+        const { user, lobby } = data;
+        console.log("Starting game");
+        startLobby(lobby, user).then((game) => {
+          // send the game info to every player in the game.. the players
+          // should now switch to in-game screen
+          console.log("Dostal som hru: ", game);
+          const players = game.msg.players;
+          for (const pid in players) {
+            const player = players[pid];
+            userLobbyMap[player] = game._id; // we reuse lobby map as game map
+            console.log("Idem logovat");
+            userSocketMap[player].emit('game started', {
+              game: game
+            });
+          }
+        })
       });
 
       const clearUser = (user, lobby) => {

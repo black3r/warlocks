@@ -14,6 +14,7 @@ export default class Lobby extends Component {
     user: PropTypes.object,
     selectedLobby: PropTypes.object,
     selectLobby: PropTypes.func.isRequired,
+    startLobby: PropTypes.func.isRequired,
   };
 
   componentDidMount() {
@@ -23,6 +24,13 @@ export default class Lobby extends Component {
       socket.emit('joined lobby', {
         user: this.props.user.username,
         lobby: this.props.selectedLobby._id,
+      });
+
+      socket.on('game started', (data) => {
+        const game = data.game;
+        console.log("Game started!", game);
+        this.props.startLobby(game.msg);
+        // TODO: pushnut do storu game, a potom na willReceiveProps redirectnut na /game
       });
     }
     this.timeout = setInterval(() => {
@@ -44,6 +52,15 @@ export default class Lobby extends Component {
       clearInterval(this.timeout);
     }
   }
+
+  startGame = () => {
+    if (socket) {
+      socket.emit('lobby start', {
+        user: this.props.user.username,
+        lobby: this.props.selectedLobby._id,
+      });
+    }
+  };
 
   timeout = null;
 
@@ -77,6 +94,7 @@ export default class Lobby extends Component {
           <Button
             bsStyle="primary"
             disabled={ !enabled }
+            onClick={ this.startGame }
           >
             Start game
           </Button>

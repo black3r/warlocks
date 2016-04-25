@@ -10,6 +10,8 @@ const GET_LOBBY = 'warlocks/lobby/GET';
 const GET_LOBBY_SUCCESS = 'warlocks/lobby/GET_SUCCESS';
 const GET_LOBBY_FAIL = 'warlocks/lobby/GET_FAIL';
 
+const START_LOBBY = 'warlocks/lobby/START';
+
 const initialState = {
   loaded: false,
   selecting: false,
@@ -134,5 +136,12 @@ export function selectLobby(id) {
         return data.msg;
       }
     })
+  };
+}
+
+export function startLobby(game) {
+  return {
+    type: START_LOBBY,
+    result: game,
   };
 }

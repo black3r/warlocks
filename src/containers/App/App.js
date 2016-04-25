@@ -31,12 +31,16 @@ import { asyncConnect } from 'redux-async-connect';
   }
 }])
 @connect(
-  state => ({user: state.auth.user}),
+  state => ({
+    user: state.auth.user,
+    game: state.game.game,
+  }),
   {logout, pushState: routeActions.push})
 export default class App extends Component {
   static propTypes = {
     children: PropTypes.object.isRequired,
     user: PropTypes.object,
+    game: PropTypes.object,
     logout: PropTypes.func.isRequired,
     pushState: PropTypes.func.isRequired
   };
@@ -52,6 +56,9 @@ export default class App extends Component {
     } else if (this.props.user && !nextProps.user) {
       // logout
       this.props.pushState('/');
+    }
+    if (!this.props.game && nextProps.game) {
+      this.props.pushState('/game');
     }
   }
 

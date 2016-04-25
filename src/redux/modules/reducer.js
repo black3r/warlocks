@@ -9,6 +9,7 @@ import {reducer as form} from 'redux-form';
 import info from './info';
 import widgets from './widgets';
 import lobby from './lobby';
+import game from './game';
 
 export default combineReducers({
   routing: routeReducer,
@@ -22,5 +23,6 @@ export default combineReducers({
   }),
   info,
   widgets,
-  lobby
+  lobby,
+  game,
 });
