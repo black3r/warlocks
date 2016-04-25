@@ -142,7 +142,7 @@ db.once('open', () => {
           // should now switch to in-game screen
           console.log("Dostal som hru: ", game);
           const players = game.msg.players;
-          for (const pid in players) {
+          for (let pid = 0; pid < players.length; pid++) {
             const player = players[pid];
             userLobbyMap[player] = game._id; // we reuse lobby map as game map
             console.log("Idem logovat");
@@ -150,7 +150,7 @@ db.once('open', () => {
               game: game
             });
           }
-        })
+        });
       });
 
       const clearUser = (user, lobby) => {
