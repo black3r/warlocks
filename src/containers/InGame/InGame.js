@@ -47,14 +47,15 @@ export default class InGame extends Component {
       graphics.drawCircle(400, 300, 580);
 
       for (let i = 0; i < that.props.game.players.length; i++) {
-        const tempPlayer = game.add.sprite(0, 0, 'phaser');
+        const [x, y] = [200*Math.sin(i*Math.PI/4) + 400, 200*Math.cos(i*Math.PI/4) + 300];
+        const tempPlayer = game.add.sprite(x, y, 'phaser');
         game.physics.enable(tempPlayer, Phaser.Physics.ARCADE);
         that.players.push(tempPlayer);
         if (that.props.game.players[i] === that.props.user.username) {
           console.log("My player has id: ", i);
           that.player = tempPlayer;
         }
-        that.targets.push([0, 0]);
+        that.targets.push([x, y]);
       }
       game.canvas.oncontextmenu = function (e) { e.preventDefault(); return false; }
 
