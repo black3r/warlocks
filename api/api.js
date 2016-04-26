@@ -182,10 +182,19 @@ db.once('open', () => {
         }).exec().then(obj => {
           console.log("Found a game in which this was moved: ", obj);
           const players = obj.players;
+          let playingPid = null;
+          for (let pid = 0; pid < players.length; pid++) {
+            if (players[pid] === user) {
+              playingPid = pid;
+            }
+          }
           for (let pid = 0; pid < players.length; pid++) {
             const playerName = players[pid];
             console.log("Notifying player: ", playerName);
-            userSocketMap[playerName].emit('player moved', data);
+            userSocketMap[playerName].emit('player moved', {
+              ...data,
+              pid: playingPid
+            });
           }
           // TODO: Notify players of the move.
         });
