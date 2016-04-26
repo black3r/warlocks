@@ -10,6 +10,7 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { User } from './models/user';
 import { Lobby } from './models/lobby';
+import { Game } from './models/game';
 import { login } from './actions/login';
 import { register } from './actions/register';
 import { getLobbyList } from './actions/getLobbyList';
@@ -117,6 +118,7 @@ db.once('open', () => {
 
     const userSocketMap = {};
     const userLobbyMap = {};
+    const userGameMap = {};
 
     io.on('connection', (socket) => {
       socket.emit('news', {msg: `'Hello World!' from server`});
@@ -144,7 +146,8 @@ db.once('open', () => {
           const players = game.msg.players;
           for (let pid = 0; pid < players.length; pid++) {
             const player = players[pid];
-            userLobbyMap[player] = game._id; // we reuse lobby map as game map
+            console.log("Nastavujem hracovi hru:", player, game.msg._id);
+            userGameMap[player] = game.msg._id; // we reuse lobby map as game map
             console.log("Idem logovat");
             userSocketMap[player].emit('game started', {
               game: game
@@ -153,8 +156,42 @@ db.once('open', () => {
         });
       });
 
+      socket.on('fired a shot', (data) => {
+        const { user, player, target } = data;
+        console.log("Someone fired a shot!");
+        console.log(data);
+        const game = userGameMap[user];
+        console.log(game);
+        Game.findOne({
+          _id: game,
+        }).exec().then(obj => {
+          console.log("Found a game in which this was fired: ", obj);
+          // TODO: Notify players of the shot.
+        });
+      });
+
+      socket.on('moved', (data) => {
+        const { user, player, target } = data;
+        console.log("Someone moved!");
+        console.log(data);
+        const game = userGameMap[user];
+        console.log(game);
+        // TODO: cache the game, not perform db lookups on every move.
+        Game.findOne({
+          _id: game,
+        }).exec().then(obj => {
+          console.log("Found a game in which this was moved: ", obj);
+          const players = obj.players;
+          for (let pid = 0; pid < players.length; pid++) {
+            const playerName = players[pid];
+            console.log("Notifying player: ", playerName);
+            userSocketMap[playerName].emit('player moved', data);
+          }
+          // TODO: Notify players of the move.
+        });
+      });
+
       const clearUser = (user, lobby) => {
-        delete userSocketMap[user];
         delete userLobbyMap[user];
         Lobby.findOne({
           _id: lobby
@@ -168,6 +205,7 @@ db.once('open', () => {
       };
 
       socket.on('removed from lobby', (data) => {
+        console.log("removing from lobby");
         const { user, lobby } = data;
         clearUser(user, lobby);
       });
