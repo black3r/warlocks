@@ -22,6 +22,7 @@ export default class InGame extends Component {
   players = [];
   target = [0, 0];
   targets = [];
+  bullets = [];
 
   componentDidMount() {
     const Phaser = window.Phaser;
@@ -57,19 +58,17 @@ export default class InGame extends Component {
       }
       game.canvas.oncontextmenu = function (e) { e.preventDefault(); return false; }
 
-      bullets = game.add.group();
-      bullets.enableBody = true;
-      bullets.physicsBodyType = Phaser.Physics.ARCADE;
+      that.bullets = game.add.group();
+      that.bullets.enableBody = true;
+      that.bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-      bullets.createMultiple(50, 'bullet');
-      bullets.setAll('checkWorldBounds', true);
-      bullets.setAll('outOfBoundsKill', true);
+      that.bullets.createMultiple(50, 'bullet');
+      that.bullets.setAll('checkWorldBounds', true);
+      that.bullets.setAll('outOfBoundsKill', true);
     }
 
-    var bullets = [];
-
     function fire() {
-      if (game.time.now > nextFire && bullets.countDead() > 0) {
+      if (game.time.now > nextFire && that.bullets.countDead() > 0) {
         nextFire = game.time.now + fireRate;
         if (socket) {
           socket.emit('fired a shot', {
@@ -78,9 +77,7 @@ export default class InGame extends Component {
             target: [game.input.activePointer.x, game.input.activePointer.y],
           });
         }
-        // var bullet = bullets.getFirstDead();
-        // bullet.reset(player.x, player.y);
-        // game.physics.arcade.moveToXY(bullet, game.input.activePointer.x, game.input.activePointer.y);
+
       }
     }
 
@@ -119,6 +116,12 @@ export default class InGame extends Component {
         this.players[data.pid].x = data.player[0];
         this.players[data.pid].y = data.player[1];
         this.targets[data.pid] = data.target;
+      });
+
+      socket.on('player fired', (data) => {
+        var bullet = this.bullets.getFirstDead();
+        bullet.reset(data.player[0], data.player[1]);
+        game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1]);
       });
     }
   }
