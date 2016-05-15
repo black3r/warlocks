@@ -22,6 +22,7 @@ export default class InGame extends Component {
   players = [];
   moving = [];
   target = [0, 0];
+  playerHealths = [];
   targets = [];
   bullets = [];
 
@@ -88,6 +89,7 @@ export default class InGame extends Component {
         }
         that.targets.push([x, y]);
         that.moving.push(false);
+        that.playerHealths.push(100);
       }
       game.canvas.oncontextmenu = function (e) { e.preventDefault(); return false; }
     }
@@ -109,7 +111,6 @@ export default class InGame extends Component {
             target: [game.input.activePointer.x, game.input.activePointer.y],
           });
         }
-
       }
     }
 
@@ -145,10 +146,21 @@ export default class InGame extends Component {
       }
     }
 
+    function renderPhaser() {
+      for (var i = 0; i < that.players.length; i++) {
+        const player = that.players[i];
+        const hbbg = new Phaser.Rectangle(player.x - player.width/2, player.y - player.height/2 - 10, 30, 4);
+        game.debug.geom(hbbg, '#ff0000');
+        const hb = new Phaser.Rectangle(player.x - player.width/2, player.y - player.height/2 - 10, (30*that.playerHealths[i])/100, 4);
+        game.debug.geom(hb, '#00ff00');
+      }
+    }
+
     const game = new Phaser.Game(800, 600, Phaser.AUTO, 'ingame_screen', {
       preload: preload,
       create: create,
-      update: update
+      update: update,
+      render: renderPhaser,
     });
 
     if (socket) {
