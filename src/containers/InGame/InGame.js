@@ -40,6 +40,8 @@ export default class InGame extends Component {
 
     var fireRate = 400;
     var nextFire = 0;
+    var nextDmg = 0;
+    var dmgRate = 400;
 
     function collisionHandler(player, bullet) {
       bullet.kill();
@@ -144,6 +146,17 @@ export default class InGame extends Component {
           game.physics.arcade.moveToXY(that.players[i], that.targets[i][0], that.targets[i][1], 200);
         }
       }
+
+      if (game.time.now > nextDmg) {
+        nextDmg = game.time.now + dmgRate;
+        const x = that.player.x;
+        const y = that.player.y;
+        if ((x - 400)*(x - 400) + (y - 300)*(y - 300) > 290*290) {
+          socket.emit('dmg', {
+            user: that.props.user.username,
+          });
+        }
+      }
     }
 
     function renderPhaser() {
@@ -197,6 +210,10 @@ export default class InGame extends Component {
         var bullet = this.bullets.getFirstDead();
         bullet.reset(data.player[0], data.player[1]);
         game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1]);
+      });
+
+      socket.on('got dmg', (data) => {
+        this.playerHealths[data.pid] -= 10;
       });
 
       socket.on('player got hit', (data) => {
