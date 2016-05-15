@@ -50,6 +50,7 @@ export default class InGame extends Component {
         const [x, y] = [200*Math.sin(i*Math.PI/4) + 400, 200*Math.cos(i*Math.PI/4) + 300];
         const tempPlayer = game.add.sprite(x, y, 'phaser');
         game.physics.enable(tempPlayer, Phaser.Physics.ARCADE);
+        tempPlayer.anchor.setTo(0.5);
         that.players.push(tempPlayer);
         if (that.props.game.players[i] === that.props.user.username) {
           console.log("My player has id: ", i);
@@ -71,10 +72,16 @@ export default class InGame extends Component {
     function fire() {
       if (game.time.now > nextFire && that.bullets.countDead() > 0) {
         nextFire = game.time.now + fireRate;
+        const vector = [game.input.activePointer.x - that.player.x, game.input.activePointer.y - that.player.y];
+        const veclen = Math.sqrt(vector[0]*vector[0] + vector[1]*vector[1]);
+        vector[0] /= veclen;
+        vector[1] /= veclen;
+        vector[0] *= 30;
+        vector[1] *= 30;
         if (socket) {
           socket.emit('fired a shot', {
             user: that.props.user.username,
-            player: [that.player.x, that.player.y],
+            player: [that.player.x + vector[0], that.player.y + vector[1]],
             target: [game.input.activePointer.x, game.input.activePointer.y],
           });
         }
@@ -121,6 +128,7 @@ export default class InGame extends Component {
 
       socket.on('player fired', (data) => {
         var bullet = this.bullets.getFirstDead();
+        bullet.anchor.setTo(0.5, 0.5);
         bullet.reset(data.player[0], data.player[1]);
         game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1]);
       });
