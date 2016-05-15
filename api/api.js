@@ -119,6 +119,7 @@ db.once('open', () => {
     const userSocketMap = {};
     const userLobbyMap = {};
     const userGameMap = {};
+    const userPlayersMap = {};
 
     io.on('connection', (socket) => {
       socket.emit('news', {msg: `'Hello World!' from server`});
@@ -148,6 +149,7 @@ db.once('open', () => {
             const player = players[pid];
             console.log("Nastavujem hracovi hru:", player, game.msg._id);
             userGameMap[player] = game.msg._id; // we reuse lobby map as game map
+            userPlayersMap[player] = players;
             console.log("Idem logovat");
             userSocketMap[player].emit('game started', {
               game: game
@@ -162,27 +164,22 @@ db.once('open', () => {
         console.log(data);
         const game = userGameMap[user];
         console.log(game);
-        Game.findOne({
-          _id: game,
-        }).exec().then(obj => {
-          console.log("Found a game in which this was fired: ", obj);
-          // TODO: Notify players of the shot.
-          const players = obj.players;
-          let playingPid = null;
-          for (let pid = 0; pid < players.length; pid++) {
-            if (players[pid] === user) {
-              playingPid = pid;
-            }
+        const players = userPlayersMap[user];
+
+        let playingPid = null;
+        for (let pid = 0; pid < players.length; pid++) {
+          if (players[pid] === user) {
+            playingPid = pid;
           }
-          for (let pid = 0; pid < players.length; pid++) {
-            const playerName = players[pid];
-            console.log("Notifying player: ", playerName);
-            userSocketMap[playerName].emit('player fired', {
-              ...data,
-              pid: playingPid
-            });
-          }
-        });
+        }
+        for (let pid = 0; pid < players.length; pid++) {
+          const playerName = players[pid];
+          console.log("Notifying player: ", playerName);
+          userSocketMap[playerName].emit('player fired', {
+            ...data,
+            pid: playingPid
+          });
+        }
       });
 
       socket.on('moved', (data) => {
@@ -191,28 +188,22 @@ db.once('open', () => {
         console.log(data);
         const game = userGameMap[user];
         console.log(game);
-        // TODO: cache the game, not perform db lookups on every move.
-        Game.findOne({
-          _id: game,
-        }).exec().then(obj => {
-          console.log("Found a game in which this was moved: ", obj);
-          const players = obj.players;
-          let playingPid = null;
-          for (let pid = 0; pid < players.length; pid++) {
-            if (players[pid] === user) {
-              playingPid = pid;
-            }
+
+        const players = userPlayersMap[user];
+        let playingPid = null;
+        for (let pid = 0; pid < players.length; pid++) {
+          if (players[pid] === user) {
+            playingPid = pid;
           }
-          for (let pid = 0; pid < players.length; pid++) {
-            const playerName = players[pid];
-            console.log("Notifying player: ", playerName);
-            userSocketMap[playerName].emit('player moved', {
-              ...data,
-              pid: playingPid
-            });
-          }
-          // TODO: Notify players of the move.
-        });
+        }
+        for (let pid = 0; pid < players.length; pid++) {
+          const playerName = players[pid];
+          console.log("Notifying player: ", playerName);
+          userSocketMap[playerName].emit('player moved', {
+            ...data,
+            pid: playingPid
+          });
+        }
       });
 
       const clearUser = (user, lobby) => {
