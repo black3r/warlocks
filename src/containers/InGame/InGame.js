@@ -1,6 +1,6 @@
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
-import * as lobbyActions from 'redux/modules/lobby';
+import * as gameActions from 'redux/modules/game';
 import { Grid, Row, Col, Table, Button } from 'react-bootstrap';
 
 @connect(
@@ -8,14 +8,16 @@ import { Grid, Row, Col, Table, Button } from 'react-bootstrap';
     user: state.auth.user,
     selectedLobby: state.lobby.selected,
     game: state.game.game,
-  }), lobbyActions
+    winner: state.game.winner,
+  }), gameActions
 )
 export default class InGame extends Component {
   static propTypes = {
     user: PropTypes.object,
     selectedLobby: PropTypes.object,
     game: PropTypes.object,
-    selectLobby: PropTypes.func.isRequired,
+    gameOver: PropTypes.func.isRequired,
+    winner: PropTypes.string,
   };
 
   player = null;
@@ -226,6 +228,22 @@ export default class InGame extends Component {
       socket.on('player died', (data) => {
         const { pid } = data;
         this.players[pid].kill();
+        let activeCount = 0;
+        let active = null;
+        for (let i = 0; i < this.players.length; i++) {
+          if (this.players[i].alive) {
+            activeCount++;
+            active = this.props.game.players[i];
+          }
+        }
+        if (activeCount == 1) {
+          this.props.gameOver(active);
+          if (active === this.props.user.username) {
+            socket.emit('won', {
+              user: this.props.user.username
+            });
+          }
+        }
       });
 
       socket.on('player got hit', (data) => {
@@ -247,13 +265,24 @@ export default class InGame extends Component {
 
   render() {
     // TODO: store pre hru
-    return (
-      <Grid>
-        <Row>
-          <h1>Game: #ID</h1>
-          <div id="ingame_screen" />
-        </Row>
-      </Grid>
-    );
+    if (!this.props.winner) {
+      return (
+        <Grid>
+          <Row>
+            <h1>Game: #ID</h1>
+            <div id="ingame_screen"/>
+          </Row>
+        </Grid>
+      );
+    } else {
+      return (
+        <Grid>
+          <Row>
+            <h1>Game over!</h1>
+            <h2>Winner is { this.props.winner }</h2>
+          </Row>
+        </Grid>
+      )
+    }
   }
 }
