@@ -251,6 +251,29 @@ db.once('open', () => {
         }
       });
 
+      socket.on('died', (data) => {
+        const { user } = data;
+        console.log("Someone died");
+        console.log(data);
+
+        const players = userPlayersMap[user];
+        let playingPid = null;
+        for (let pid = 0; pid < players.length; pid++) {
+          if (players[pid] === user) {
+            playingPid = pid;
+          }
+        }
+
+        for (let pid = 0; pid < players.length; pid++) {
+          const playerName = players[pid];
+          console.log("Notifying player: ", playerName);
+          userSocketMap[playerName].emit('player died', {
+            ...data,
+            pid: playingPid
+          });
+        }
+      });
+
       const clearUser = (user, lobby) => {
         delete userLobbyMap[user];
         Lobby.findOne({

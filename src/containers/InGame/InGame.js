@@ -151,7 +151,7 @@ export default class InGame extends Component {
         nextDmg = game.time.now + dmgRate;
         const x = that.player.x;
         const y = that.player.y;
-        if ((x - 400)*(x - 400) + (y - 300)*(y - 300) > 290*290) {
+        if ((x - 400)*(x - 400) + (y - 300)*(y - 300) > 290*290 && that.player.alive) {
           socket.emit('dmg', {
             user: that.props.user.username,
           });
@@ -163,10 +163,12 @@ export default class InGame extends Component {
       // Render healthbars
       for (var i = 0; i < that.players.length; i++) {
         const player = that.players[i];
-        const hbbg = new Phaser.Rectangle(player.x - player.width/2, player.y - player.height/2 - 10, 30, 4);
-        game.debug.geom(hbbg, '#ff0000');
-        const hb = new Phaser.Rectangle(player.x - player.width/2, player.y - player.height/2 - 10, (30*that.playerHealths[i])/100, 4);
-        game.debug.geom(hb, '#00ff00');
+        if (player.alive) {
+          const hbbg = new Phaser.Rectangle(player.x - player.width/2, player.y - player.height/2 - 10, 30, 4);
+          game.debug.geom(hbbg, '#ff0000');
+          const hb = new Phaser.Rectangle(player.x - player.width/2, player.y - player.height/2 - 10, (30*that.playerHealths[i])/100, 4);
+          game.debug.geom(hb, '#00ff00');
+        }
       }
 
       // Render cooldown...
@@ -214,6 +216,16 @@ export default class InGame extends Component {
 
       socket.on('got dmg', (data) => {
         this.playerHealths[data.pid] -= 10;
+        if (this.props.game.players[data.pid] === this.props.user.username && this.playerHealths[data.pid] <= 0) {
+          socket.emit('died', {
+            user: that.props.user.username,
+          });
+        }
+      });
+
+      socket.on('player died', (data) => {
+        const { pid } = data;
+        this.players[pid].kill();
       });
 
       socket.on('player got hit', (data) => {
