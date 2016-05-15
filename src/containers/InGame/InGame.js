@@ -41,18 +41,21 @@ export default class InGame extends Component {
     var nextFire = 0;
 
     function collisionHandler(player, bullet) {
-      const angle = game.physics.arcade.angleBetween(player, bullet);
-      const x = Math.cos(angle);
-      const y = Math.sin(angle);
-      console.log(x, y);
-      player.x -= x * 50;
-      player.y -= y * 50;
       bullet.kill();
-      console.log(player);
-      // We will be sending the player ID and x, y to the server to rebroadcast to
-      // all players.
+      // destroy the bullet when it hit someone..
+      // the information where to move the player will come from server.
       if (that.player === player) {
-        // TODO: set the request to the server...
+        const angle = game.physics.arcade.angleBetween(player, bullet);
+        const x = Math.cos(angle);
+        const y = Math.sin(angle);
+        console.log(x, y);
+        player.x -= x * 50;
+        player.y -= y * 50;
+
+        socket.emit('got hit', {
+          user: that.props.user.username,
+          vector: [x, y],
+        });
       }
     }
 
@@ -163,6 +166,17 @@ export default class InGame extends Component {
         bullet.reset(data.player[0], data.player[1]);
         game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1]);
       });
+
+      socket.on('player got hit', (data) => {
+        for (let i = 0; i < 10; i++) {
+          const distance = (10 - i) * 1.5;
+          const delay = (i + 1) * 100;
+          setTimeout(() => {
+            this.players[data.pid].x -= data.vector[0] * distance;
+            this.players[data.pid].y -= data.vector[1] * distance;
+          }, delay)
+        }
+      })
     }
   }
 
