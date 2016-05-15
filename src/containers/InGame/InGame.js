@@ -147,6 +147,7 @@ export default class InGame extends Component {
     }
 
     function renderPhaser() {
+      // Render healthbars
       for (var i = 0; i < that.players.length; i++) {
         const player = that.players[i];
         const hbbg = new Phaser.Rectangle(player.x - player.width/2, player.y - player.height/2 - 10, 30, 4);
@@ -154,6 +155,25 @@ export default class InGame extends Component {
         const hb = new Phaser.Rectangle(player.x - player.width/2, player.y - player.height/2 - 10, (30*that.playerHealths[i])/100, 4);
         game.debug.geom(hb, '#00ff00');
       }
+
+      // Render cooldown...
+      let cooldown = 0;
+      let color = '#000000';
+      if (game.time.now > nextFire && that.bullets.countDead() > 0) {
+        cooldown = 1;
+        color = '#0000ff';
+      } else {
+        cooldown = (nextFire - game.time.now) / fireRate;
+        console.log(cooldown);
+        // Draw healthbar % long cooldown.
+        color = '#00ff00';
+      }
+      const border = new Phaser.Rectangle(0, 575, 800, 25);
+      game.debug.geom(border, '#000000');
+      const cdbg = new Phaser.Rectangle(0, 578, 800, 22);
+      game.debug.geom(cdbg, '#ff0000');
+      const cd = new Phaser.Rectangle(0, 578, 800*cooldown, 22);
+      game.debug.geom(cd, color);
     }
 
     const game = new Phaser.Game(800, 600, Phaser.AUTO, 'ingame_screen', {
