@@ -20,6 +20,7 @@ export default class InGame extends Component {
 
   player = null;
   players = [];
+  moving = [];
   target = [0, 0];
   targets = [];
   bullets = [];
@@ -39,12 +40,38 @@ export default class InGame extends Component {
     var fireRate = 400;
     var nextFire = 0;
 
+    function collisionHandler(player, bullet) {
+      const angle = game.physics.arcade.angleBetween(player, bullet);
+      const x = Math.cos(angle);
+      const y = Math.sin(angle);
+      console.log(x, y);
+      player.x -= x * 50;
+      player.y -= y * 50;
+      bullet.kill();
+      console.log(player);
+      // We will be sending the player ID and x, y to the server to rebroadcast to
+      // all players.
+      if (that.player === player) {
+        // TODO: set the request to the server...
+      }
+    }
+
     function create() {
       game.stage.disableVisibilityChange = true;
       var graphics = game.add.graphics();
       game.stage.backgroundColor = '#ff0000';
       graphics.beginFill(0x222222);
       graphics.drawCircle(400, 300, 580);
+
+      that.bullets = game.add.group();
+      that.bullets.enableBody = true;
+      that.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+
+      that.bullets.createMultiple(50, 'bullet');
+      that.bullets.setAll('checkWorldBounds', true);
+      that.bullets.setAll('outOfBoundsKill', true);
+      that.bullets.setAll('anchor.x', 0.5);
+      that.bullets.setAll('anchor.y', 0.5);
 
       for (let i = 0; i < that.props.game.players.length; i++) {
         const [x, y] = [200*Math.sin(i*Math.PI/4) + 400, 200*Math.cos(i*Math.PI/4) + 300];
@@ -57,16 +84,9 @@ export default class InGame extends Component {
           that.player = tempPlayer;
         }
         that.targets.push([x, y]);
+        that.moving.push(false);
       }
       game.canvas.oncontextmenu = function (e) { e.preventDefault(); return false; }
-
-      that.bullets = game.add.group();
-      that.bullets.enableBody = true;
-      that.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-
-      that.bullets.createMultiple(50, 'bullet');
-      that.bullets.setAll('checkWorldBounds', true);
-      that.bullets.setAll('outOfBoundsKill', true);
     }
 
     function fire() {
@@ -81,7 +101,8 @@ export default class InGame extends Component {
         if (socket) {
           socket.emit('fired a shot', {
             user: that.props.user.username,
-            player: [that.player.x + vector[0], that.player.y + vector[1]],
+            // player: [that.player.x + vector[0], that.player.y + vector[1]],
+            player: [0, 0], // temporary when testing collision detection
             target: [game.input.activePointer.x, game.input.activePointer.y],
           });
         }
@@ -90,6 +111,11 @@ export default class InGame extends Component {
     }
 
     function update() {
+      for (var i = 0; i < that.players.length; i++) {
+        const player = that.players[i];
+        game.physics.arcade.overlap(that.bullets, player, collisionHandler, null, this);
+      }
+
       if (game.input.activePointer.leftButton.isDown) {
         if (socket) {
           socket.emit('moved', {
@@ -98,8 +124,6 @@ export default class InGame extends Component {
             target: [game.input.activePointer.x, game.input.activePointer.y],
           });
         }
-        // target[0] = game.input.activePointer.x;
-        // target[1] = game.input.activePointer.y;
       }
 
       if (game.input.activePointer.rightButton.isDown) {
@@ -107,7 +131,14 @@ export default class InGame extends Component {
       }
 
       for (let i = 0; i < that.targets.length; i++) {
-        game.physics.arcade.moveToXY(that.players[i], that.targets[i][0], that.targets[i][1], 200);
+        const dist = game.physics.arcade.distanceToXY(that.players[i], that.targets[i][0], that.targets[i][1]);
+        if (that.moving[i] && dist < 5) {
+          that.moving[i] = false;
+          that.players[i].body.velocity.setTo(0, 0);
+        }
+        if (that.moving[i]) {
+          game.physics.arcade.moveToXY(that.players[i], that.targets[i][0], that.targets[i][1], 200);
+        }
       }
     }
 
@@ -124,11 +155,11 @@ export default class InGame extends Component {
         this.players[data.pid].x = data.player[0];
         this.players[data.pid].y = data.player[1];
         this.targets[data.pid] = data.target;
+        this.moving[data.pid] = true;
       });
 
       socket.on('player fired', (data) => {
         var bullet = this.bullets.getFirstDead();
-        bullet.anchor.setTo(0.5, 0.5);
         bullet.reset(data.player[0], data.player[1]);
         game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1]);
       });
