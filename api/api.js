@@ -154,19 +154,24 @@ db.once('open', () => {
 
       socket.on('lobby start', (data) => {
         const { user, lobby } = data;
+        console.log('lobby start', lobby);
         startLobby(lobby, user).then((game) => {
           // send the game info to every player in the game.. the players
           // should now switch to in-game screen
           const players = game.msg.players;
+          console.log("lobby started");
           for (let pid = 0; pid < players.length; pid++) {
+            console.log("handling player ", pid);
             const player = players[pid];
             userGameMap[player] = game.msg._id; // we reuse lobby map as game map
             gameMoveMap[game.msg._id] = [];
             gameStartMap[game.msg._id] = +(new Date());
             userPlayersMap[player] = players;
+            console.log("emitting");
             userSocketMap[player].emit('game started', {
               game: game
             });
+            console.log("emitted");
           }
         });
       });

@@ -34,7 +34,18 @@ export default class InGame extends Component {
   targets = [];
   bullets = [];
 
+  playerFiredHandler;
+
   componentDidMount() {
+    console.log('creating game');
+    this.player = null;
+    this.players = [];
+    this.moving = [];
+    this.target = [0, 0];
+    this.playerHealths = [];
+    this.targets = [];
+    this.bullets = [];
+
     const Phaser = window.Phaser;
     const that = this;
 
@@ -72,6 +83,7 @@ export default class InGame extends Component {
     }
 
     function create() {
+      console.log("Phaser calling create");
       game.stage.disableVisibilityChange = true;
       var graphics = game.add.graphics();
       game.stage.backgroundColor = '#ff0000';
@@ -204,60 +216,75 @@ export default class InGame extends Component {
       render: renderPhaser,
     });
 
-    if (socket) {
-      socket.on('player moved', (data) => {
-        this.players[data.pid].x = data.player[0];
-        this.players[data.pid].y = data.player[1];
-        this.targets[data.pid] = data.target;
-        this.moving[data.pid] = true;
-      });
+    const playerMoveHandler = (data) => {
+      this.players[data.pid].x = data.player[0];
+      this.players[data.pid].y = data.player[1];
+      this.targets[data.pid] = data.target;
+      this.moving[data.pid] = true;
+    };
+    const playerFiredHandler = (data) => {
+      var bullet = this.bullets.getFirstDead();
+      bullet.reset(data.player[0], data.player[1]);
+      game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1], bulletSpeed);
+    };
+    const playerDmgHandler = (data) => {
+      console.log('got dmg');
+      console.log(this.playerHealths);
+      this.playerHealths[data.pid] -= 10;
+      if (this.props.game.players[data.pid] === this.props.user.username && this.playerHealths[data.pid] <= 0) {
+        socket.emit('died', {
+          user: that.props.user.username,
+        });
+      }
+    };
 
-      socket.on('player fired', (data) => {
-        var bullet = this.bullets.getFirstDead();
-        bullet.reset(data.player[0], data.player[1]);
-        game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1], bulletSpeed);
-      });
-
-      socket.on('got dmg', (data) => {
-        this.playerHealths[data.pid] -= 10;
-        if (this.props.game.players[data.pid] === this.props.user.username && this.playerHealths[data.pid] <= 0) {
-          socket.emit('died', {
-            user: that.props.user.username,
+    const playerDiedHandler = (data) => {
+      const { pid } = data;
+      this.players[pid].kill();
+      let activeCount = 0;
+      let active = null;
+      for (let i = 0; i < this.players.length; i++) {
+        if (this.players[i].alive) {
+          activeCount++;
+          active = this.props.game.players[i];
+        }
+      }
+      if (activeCount == 1) {
+        this.disconnect();
+        this.props.gameOver(active);
+        if (active === this.props.user.username) {
+          socket.emit('won', {
+            user: this.props.user.username
           });
         }
-      });
+      }
+    };
 
-      socket.on('player died', (data) => {
-        const { pid } = data;
-        this.players[pid].kill();
-        let activeCount = 0;
-        let active = null;
-        for (let i = 0; i < this.players.length; i++) {
-          if (this.players[i].alive) {
-            activeCount++;
-            active = this.props.game.players[i];
-          }
-        }
-        if (activeCount == 1) {
-          this.props.gameOver(active);
-          if (active === this.props.user.username) {
-            socket.emit('won', {
-              user: this.props.user.username
-            });
-          }
-        }
-      });
+    const playerHitHandler = (data) => {
+      for (let i = 0; i < 10; i++) {
+        const distance = (10 - i) * 1.5;
+        const delay = (i + 1) * 100;
+        setTimeout(() => {
+          this.players[data.pid].x -= data.vector[0] * distance;
+          this.players[data.pid].y -= data.vector[1] * distance;
+        }, delay)
+      }
+    };
 
-      socket.on('player got hit', (data) => {
-        for (let i = 0; i < 10; i++) {
-          const distance = (10 - i) * 1.5;
-          const delay = (i + 1) * 100;
-          setTimeout(() => {
-            this.players[data.pid].x -= data.vector[0] * distance;
-            this.players[data.pid].y -= data.vector[1] * distance;
-          }, delay)
-        }
-      });
+    that.disconnect = () => {
+      socket.off('player moved', playerMoveHandler);
+      socket.off('player fired', playerFiredHandler);
+      socket.off('got dmg', playerDmgHandler);
+      socket.off('player died', playerDiedHandler);
+      socket.off('player got hit', playerHitHandler);
+    };
+
+    if (socket) {
+      socket.on('player moved', playerMoveHandler);
+      socket.on('player fired', playerFiredHandler);
+      socket.on('got dmg', playerDmgHandler);
+      socket.on('player died', playerDiedHandler);
+      socket.on('player got hit', playerHitHandler);
     }
   }
 

@@ -57,7 +57,7 @@ export default class App extends Component {
       // logout
       this.props.pushState('/');
     }
-    if (!this.props.game && nextProps.game) {
+    if (this.props.game !== nextProps.game) {
       this.props.pushState('/game');
     }
   }
