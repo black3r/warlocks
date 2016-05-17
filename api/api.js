@@ -357,6 +357,27 @@ db.once('open', () => {
         clearUser(user, lobby);
       });
 
+      socket.on('leave', (data) => {
+        const { user } = data;
+        if (userGameMap.hasOwnProperty(user)) {
+          const players = userPlayersMap[user];
+
+          let playingPid = null;
+          for (let pid = 0; pid < players.length; pid++) {
+            if (players[pid] === user) {
+              playingPid = pid;
+            }
+          }
+
+          for (let pid = 0; pid < players.length; pid++) {
+            const playerName = players[pid];
+            userSocketMap[playerName].emit('player died', {
+              pid: playingPid
+            });
+          }
+        }
+      });
+
       socket.on('disconnect', () => {
         const keys = Object.keys(userSocketMap).filter(key => userSocketMap[key] === socket);
         if (keys.length) {
@@ -372,7 +393,7 @@ db.once('open', () => {
                 playingPid = pid;
               }
             }
-            
+
             for (let pid = 0; pid < players.length; pid++) {
               const playerName = players[pid];
               userSocketMap[playerName].emit('player died', {

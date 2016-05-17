@@ -255,7 +255,9 @@ export default class InGame extends Component {
   }
 
   componentWillUnmount() {
-    // posle sa disconnect message
+    socket.emit('leave', {
+      user: this.props.user.username,
+    });
   }
 
   render() {
