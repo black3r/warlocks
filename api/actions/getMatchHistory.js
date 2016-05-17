@@ -2,8 +2,8 @@ import { Game } from '../models/game';
 
 export function getMatchHistory(player) {
   return Game.find({
+    status: "finished",
     players: {
-      status: "finished",
       $in: [player],
     }
   }).exec().then((games) => {
