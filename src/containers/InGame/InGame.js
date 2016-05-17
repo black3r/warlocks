@@ -73,8 +73,6 @@ export default class InGame extends Component {
         const angle = game.physics.arcade.angleBetween(player, bullet);
         const x = Math.cos(angle);
         const y = Math.sin(angle);
-        player.x -= x * 50;
-        player.y -= y * 50;
 
         socket.emit('got hit', {
           user: that.props.user.username,
