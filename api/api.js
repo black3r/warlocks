@@ -102,7 +102,6 @@ db.once('open', () => {
   app.get('/match/list/', (req, res) => {
     if (req.isAuthenticated()) {
       const username = req.user.username;
-      console.log(username);
       getMatchHistory(username).then((data) => res.json(data));
     } else return [];
   });
@@ -155,20 +154,16 @@ db.once('open', () => {
 
       socket.on('lobby start', (data) => {
         const { user, lobby } = data;
-        console.log("Starting game");
         startLobby(lobby, user).then((game) => {
           // send the game info to every player in the game.. the players
           // should now switch to in-game screen
-          console.log("Dostal som hru: ", game);
           const players = game.msg.players;
           for (let pid = 0; pid < players.length; pid++) {
             const player = players[pid];
-            console.log("Nastavujem hracovi hru:", player, game.msg._id);
             userGameMap[player] = game.msg._id; // we reuse lobby map as game map
             gameMoveMap[game.msg._id] = [];
             gameStartMap[game.msg._id] = +(new Date());
             userPlayersMap[player] = players;
-            console.log("Idem logovat");
             userSocketMap[player].emit('game started', {
               game: game
             });
@@ -178,8 +173,6 @@ db.once('open', () => {
 
       socket.on('fired a shot', (data) => {
         const { user, player, target } = data;
-        console.log("Someone fired a shot!");
-        console.log(data);
         const game = userGameMap[user];
         gameMoveMap[game].push({
           player: user,
@@ -189,7 +182,6 @@ db.once('open', () => {
           time: +(new Date()) - gameStartMap[game],
           attackType: '',
         });
-        console.log(game);
         const players = userPlayersMap[user];
 
         let playingPid = null;
@@ -200,7 +192,6 @@ db.once('open', () => {
         }
         for (let pid = 0; pid < players.length; pid++) {
           const playerName = players[pid];
-          console.log("Notifying player: ", playerName);
           userSocketMap[playerName].emit('player fired', {
             ...data,
             pid: playingPid
@@ -210,10 +201,7 @@ db.once('open', () => {
 
       socket.on('moved', (data) => {
         const { user, player, target } = data;
-        console.log("Someone moved!");
-        console.log(data);
         const game = userGameMap[user];
-        console.log(game);
 
         gameMoveMap[game].push({
           player: user,
@@ -233,7 +221,6 @@ db.once('open', () => {
         }
         for (let pid = 0; pid < players.length; pid++) {
           const playerName = players[pid];
-          console.log("Notifying player: ", playerName);
           userSocketMap[playerName].emit('player moved', {
             ...data,
             pid: playingPid
@@ -243,8 +230,6 @@ db.once('open', () => {
 
       socket.on('got hit', (data) => {
         const { user, vector } = data;
-        console.log("Someone got hit!");
-        console.log(data);
         const players = userPlayersMap[user];
         let playingPid = null;
         for (let pid = 0; pid < players.length; pid++) {
@@ -265,7 +250,6 @@ db.once('open', () => {
 
         for (let pid = 0; pid < players.length; pid++) {
           const playerName = players[pid];
-          console.log("Notifying player: ", playerName);
           userSocketMap[playerName].emit('player got hit', {
             ...data,
             pid: playingPid
@@ -275,8 +259,6 @@ db.once('open', () => {
 
       socket.on('dmg', (data) => {
         const { user } = data;
-        console.log("Someone got dmg");
-        console.log(data);
 
         const players = userPlayersMap[user];
         let playingPid = null;
@@ -298,7 +280,6 @@ db.once('open', () => {
 
         for (let pid = 0; pid < players.length; pid++) {
           const playerName = players[pid];
-          console.log("Notifying player: ", playerName);
           userSocketMap[playerName].emit('got dmg', {
             ...data,
             pid: playingPid
@@ -308,8 +289,6 @@ db.once('open', () => {
 
       socket.on('died', (data) => {
         const { user } = data;
-        console.log("Someone died");
-        console.log(data);
 
         const players = userPlayersMap[user];
         let playingPid = null;
@@ -331,7 +310,6 @@ db.once('open', () => {
 
         for (let pid = 0; pid < players.length; pid++) {
           const playerName = players[pid];
-          console.log("Notifying player: ", playerName);
           userSocketMap[playerName].emit('player died', {
             ...data,
             pid: playingPid
@@ -341,8 +319,6 @@ db.once('open', () => {
 
       socket.on('won', (data) => {
         const { user } = data;
-        console.log("Game is over!");
-        console.log(data);
 
         const game = userGameMap[user];
 
@@ -365,7 +341,6 @@ db.once('open', () => {
       };
 
       socket.on('removed from lobby', (data) => {
-        console.log("removing from lobby");
         const { user, lobby } = data;
         clearUser(user, lobby);
       });

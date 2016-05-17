@@ -36,7 +36,7 @@ export default class Chat extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.props.selectedLobby && nextProps.selectedLobby) {
+    if (this.props.selectedLobby !== nextProps.selectedLobby) {
       this.props.pushState('/lobby');
     }
   }

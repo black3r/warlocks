@@ -53,7 +53,6 @@ export default class InGame extends Component {
         const angle = game.physics.arcade.angleBetween(player, bullet);
         const x = Math.cos(angle);
         const y = Math.sin(angle);
-        console.log(x, y);
         player.x -= x * 50;
         player.y -= y * 50;
 
@@ -88,7 +87,6 @@ export default class InGame extends Component {
         tempPlayer.anchor.setTo(0.5);
         that.players.push(tempPlayer);
         if (that.props.game.players[i] === that.props.user.username) {
-          console.log("My player has id: ", i);
           that.player = tempPlayer;
         }
         that.targets.push([x, y]);
@@ -181,7 +179,6 @@ export default class InGame extends Component {
         color = '#0000ff';
       } else {
         cooldown = (nextFire - game.time.now) / fireRate;
-        console.log(cooldown);
         // Draw healthbar % long cooldown.
         color = '#00ff00';
       }
@@ -201,9 +198,7 @@ export default class InGame extends Component {
     });
 
     if (socket) {
-      console.log("Setting up listener");
       socket.on('player moved', (data) => {
-        console.log("Received pid: ", data.pid);
         this.players[data.pid].x = data.player[0];
         this.players[data.pid].y = data.player[1];
         this.targets[data.pid] = data.target;

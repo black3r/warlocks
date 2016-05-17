@@ -28,7 +28,6 @@ export default class Lobby extends Component {
 
       socket.on('game started', (data) => {
         const game = data.game;
-        console.log("Game started!", game);
         this.props.startLobby(game.msg);
         // TODO: pushnut do storu game, a potom na willReceiveProps redirectnut na /game
       });
