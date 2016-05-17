@@ -269,7 +269,7 @@ export default class InGame extends Component {
       return (
         <Grid>
           <Row>
-            <h1>Game: #ID</h1>
+            <h1>Game: {this.props.game._id }</h1>
             <div id="ingame_screen"/>
           </Row>
         </Grid>

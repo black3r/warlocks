@@ -91,6 +91,10 @@ export default class App extends Component {
                 <NavItem eventKey={1}>Play!</NavItem>
               </LinkContainer>}
 
+              {user && <LinkContainer to="/matchHistory">
+                <NavItem eventKey={7}>Match history</NavItem>
+              </LinkContainer>}
+
               <LinkContainer to="/about">
                 <NavItem eventKey={4}>About</NavItem>
               </LinkContainer>

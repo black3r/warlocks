@@ -10,6 +10,7 @@ import info from './info';
 import widgets from './widgets';
 import lobby from './lobby';
 import game from './game';
+import match from './match';
 
 export default combineReducers({
   routing: routeReducer,
@@ -25,4 +26,5 @@ export default combineReducers({
   widgets,
   lobby,
   game,
+  match,
 });

@@ -12,7 +12,7 @@ describe("match history backend", () => {
   after(() => mongoose.disconnect());
 
   beforeEach(() => Game.find({}).remove().exec().then(() => {
-    const game = new Game({
+    const game1 = new Game({
       players: ["tester1", "tester2"],
       rounds: [{
         players: ["tester1", "tester2"],
@@ -23,8 +23,8 @@ describe("match history backend", () => {
       scores: []
     });
 
-    return game.save().then(() => {
-      const game = new Game({
+    return game1.save().then(() => {
+      const game2 = new Game({
         players: ["tester1", "tester2"],
         rounds: [{
           players: ["tester1", "tester2"],
@@ -34,8 +34,8 @@ describe("match history backend", () => {
         status: "finished",
         scores: []
       });
-      return game.save().then(() => {
-        const game = new Game({
+      return game2.save().then(() => {
+        const game3 = new Game({
           players: ["tester3", "tester2"],
           rounds: [{
             players: ["tester3", "tester2"],
@@ -45,9 +45,9 @@ describe("match history backend", () => {
           status: "finished",
           scores: []
         });
-        return game.save();
+        return game3.save();
       });
-    })
+    });
   }));
 
   afterEach(() => Game.find({}).remove().exec());

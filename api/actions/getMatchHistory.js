@@ -15,6 +15,7 @@ export function getMatchHistory(player) {
         roundCount: game.roundCount,
         status: game.status,
         scores: game.scores,
+        winner: game.winner,
       };
     });
   });

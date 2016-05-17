@@ -15,6 +15,7 @@ const gameSchema = mongoose.Schema({
   }],
   roundCount: Number,
   status: String,
+  winner: String,
   scores: [{
     player: String,
     value: Number

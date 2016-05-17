@@ -22,6 +22,7 @@ import { getMatchHistory } from "./actions/getMatchHistory";
 
 const pretty = new PrettyError();
 const app = express();
+const MongoStore = require('connect-mongo')(session);
 
 const server = new http.Server(app);
 
@@ -38,7 +39,10 @@ db.once('open', () => {
     secret: 'SH0TjzEdtlcoZ7j6mJKNvs1GEc6uAcqCgdIpEfcdVLDKCoZFR2Rc48suaNnh',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 60000 }
+    cookie: { maxAge: 60000 },
+    store: new MongoStore({
+      mongooseConnection: db,
+    }),
   }));
   app.use(bodyParser.json());
   app.use(passport.initialize());
@@ -95,10 +99,12 @@ db.once('open', () => {
     getLobbyList().then((data) => res.json(data));
   });
 
-  app.post('/match/list/', (req, res) => {
-    const { username } = req.body;
-    console.log(username);
-    getMatchHistory(username).then((data) => res.json(data));
+  app.get('/match/list/', (req, res) => {
+    if (req.isAuthenticated()) {
+      const username = req.user.username;
+      console.log(username);
+      getMatchHistory(username).then((data) => res.json(data));
+    } else return [];
   });
 
   app.post('/lobby/get/', (req, res) => {
@@ -342,7 +348,7 @@ db.once('open', () => {
 
         // No need to notify players, they already know
         // Just update the info in database
-        gameOver(game, gameMoveMap[game]);
+        gameOver(game, gameMoveMap[game], user);
       });
 
       const clearUser = (user, lobby) => {

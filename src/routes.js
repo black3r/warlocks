@@ -12,6 +12,7 @@ import {
     LoginSuccess,
     NotFound,
     Register,
+    MatchHistory,
   } from 'containers';
 
 export default (store) => {
@@ -46,6 +47,7 @@ export default (store) => {
         <Route path="lobby" component={Lobby} />
         <Route path="game" component={InGame} />
         <Route path="loginSuccess" component={LoginSuccess}/>
+        <Route path="matchHistory" component={MatchHistory}/>
       </Route>
 
       { /* Routes */ }

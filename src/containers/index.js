@@ -8,3 +8,4 @@ export InGame from './InGame/InGame';
 export Register from './Register/Register';
 export LoginSuccess from './LoginSuccess/LoginSuccess';
 export NotFound from './NotFound/NotFound';
+export MatchHistory from './MatchHistory/MatchHistory';
