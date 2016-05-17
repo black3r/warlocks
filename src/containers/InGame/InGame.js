@@ -34,9 +34,10 @@ export default class InGame extends Component {
   targets = [];
   bullets = [];
 
-  playerFiredHandler;
-
   componentDidMount() {
+    if (!this.props.game) {
+      this.props.pushState('/play');
+    }
     console.log('creating game');
     this.player = null;
     this.players = [];
@@ -296,6 +297,7 @@ export default class InGame extends Component {
   };
 
   componentWillUnmount() {
+    if (this.disconnect) this.disconnect();
     socket.emit('leave', {
       user: this.props.user.username,
     });

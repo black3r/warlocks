@@ -2,12 +2,16 @@ import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import * as lobbyActions from 'redux/modules/lobby';
 import { Grid, Row, Col, Table, Button } from 'react-bootstrap';
+import { routeActions } from 'react-router-redux';
 
 @connect(
   state => ({
     user: state.auth.user,
     selectedLobby: state.lobby.selected,
-  }), lobbyActions
+  }), {
+    ...lobbyActions,
+    pushState: routeActions.push
+  }
 )
 export default class Lobby extends Component {
   static propTypes = {
@@ -15,6 +19,7 @@ export default class Lobby extends Component {
     selectedLobby: PropTypes.object,
     selectLobby: PropTypes.func.isRequired,
     startLobby: PropTypes.func.isRequired,
+    pushState: PropTypes.func.isRequired,
   };
 
   componentDidMount() {
