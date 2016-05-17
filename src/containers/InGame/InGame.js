@@ -2,6 +2,7 @@ import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import * as gameActions from 'redux/modules/game';
 import { Grid, Row, Col, Table, Button } from 'react-bootstrap';
+import { routeActions } from 'react-router-redux';
 
 @connect(
   state => ({
@@ -9,7 +10,10 @@ import { Grid, Row, Col, Table, Button } from 'react-bootstrap';
     selectedLobby: state.lobby.selected,
     game: state.game.game,
     winner: state.game.winner,
-  }), gameActions
+  }), {
+    ...gameActions,
+    pushState: routeActions.push
+  }
 )
 export default class InGame extends Component {
   static propTypes = {
@@ -17,6 +21,8 @@ export default class InGame extends Component {
     selectedLobby: PropTypes.object,
     game: PropTypes.object,
     gameOver: PropTypes.func.isRequired,
+    clearGame: PropTypes.func.isRequired,
+    pushState: PropTypes.func.isRequired,
     winner: PropTypes.string,
   };
 
@@ -44,6 +50,8 @@ export default class InGame extends Component {
     var nextFire = 0;
     var nextDmg = 0;
     var dmgRate = 400;
+    var moveSpeed = 150;
+    var bulletSpeed = 400;
 
     function collisionHandler(player, bullet) {
       bullet.kill();
@@ -108,8 +116,7 @@ export default class InGame extends Component {
         if (socket) {
           socket.emit('fired a shot', {
             user: that.props.user.username,
-            // player: [that.player.x + vector[0], that.player.y + vector[1]],
-            player: [0, 0], // temporary when testing collision detection
+            player: [that.player.x + vector[0], that.player.y + vector[1]],
             target: [game.input.activePointer.x, game.input.activePointer.y],
           });
         }
@@ -143,7 +150,7 @@ export default class InGame extends Component {
           that.players[i].body.velocity.setTo(0, 0);
         }
         if (that.moving[i]) {
-          game.physics.arcade.moveToXY(that.players[i], that.targets[i][0], that.targets[i][1], 200);
+          game.physics.arcade.moveToXY(that.players[i], that.targets[i][0], that.targets[i][1], moveSpeed);
         }
       }
 
@@ -208,7 +215,7 @@ export default class InGame extends Component {
       socket.on('player fired', (data) => {
         var bullet = this.bullets.getFirstDead();
         bullet.reset(data.player[0], data.player[1]);
-        game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1]);
+        game.physics.arcade.moveToXY(bullet, data.target[0], data.target[1], bulletSpeed);
       });
 
       socket.on('got dmg', (data) => {
@@ -250,14 +257,22 @@ export default class InGame extends Component {
             this.players[data.pid].y -= data.vector[1] * distance;
           }, delay)
         }
-      })
+      });
     }
   }
+
+  disconnect = () => {
+    this.props.clearGame();
+    alert('You have been disconnected');
+    pushState('/play');
+    socket.off('disconnect', this.disconnect);
+  };
 
   componentWillUnmount() {
     socket.emit('leave', {
       user: this.props.user.username,
     });
+    socket.off('disconnect', this.disconnect);
   }
 
   render() {
