@@ -73,7 +73,7 @@ export default class Lobby extends Component {
     if (!this.props.selectedLobby) {
       return <Grid />;
     }
-    const enabled = this.props.selectedLobby.players.length && this.props.selectedLobby.players[0] === this.props.user.username;
+    const enabled = this.props.selectedLobby.players.length && this.props.selectedLobby.players[0] === this.props.user.username && this.props.selectedLobby.players.length > 1;
 
     return (
       <Grid>
