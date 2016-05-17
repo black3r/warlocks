@@ -324,7 +324,19 @@ db.once('open', () => {
 
         // No need to notify players, they already know
         // Just update the info in database
-        gameOver(game, gameMoveMap[game], user);
+        gameOver(game, gameMoveMap[game], user).then(() => {
+          players = userPlayersMap[user];
+          for (let pid = 0; pid < players.length; pid++) {
+            if (players[pid] !== user) {
+              delete userGameMap[players[pid]];
+              delete userPlayersMap[players[pid]];
+            }
+          }
+          delete userGameMap[user];
+          delete userPlayersMap[user];
+          delete gameMoveMap[game];
+          delete gameStartMap[game];
+        });
       });
 
       const clearUser = (user, lobby) => {
@@ -351,6 +363,23 @@ db.once('open', () => {
           const user = keys[0];
           const lobby = userLobbyMap[user];
           clearUser(user, lobby);
+          if (userGameMap.hasOwnProperty(user)) {
+            const players = userPlayersMap[user];
+
+            let playingPid = null;
+            for (let pid = 0; pid < players.length; pid++) {
+              if (players[pid] === user) {
+                playingPid = pid;
+              }
+            }
+            
+            for (let pid = 0; pid < players.length; pid++) {
+              const playerName = players[pid];
+              userSocketMap[playerName].emit('player died', {
+                pid: playingPid
+              });
+            }
+          }
         }
       });
 
