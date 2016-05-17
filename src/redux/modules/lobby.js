@@ -10,6 +10,7 @@ const GET_LOBBY = 'warlocks/lobby/GET';
 const GET_LOBBY_SUCCESS = 'warlocks/lobby/GET_SUCCESS';
 const GET_LOBBY_FAIL = 'warlocks/lobby/GET_FAIL';
 
+const CLEAR_LOBBY = 'warlocks/lobby/CLEAR';
 const START_LOBBY = 'warlocks/lobby/START';
 
 const initialState = {
@@ -46,7 +47,6 @@ export default function lobby(state = initialState, action = {}) {
         ...state,
         selecting: true,
         selectError: null,
-        selected: null
       };
     case CREATE_LOBBY_SUCCESS:
       return {
@@ -83,6 +83,8 @@ export default function lobby(state = initialState, action = {}) {
         selectError: action.error,
         selected: null,
       };
+    case CLEAR_LOBBY:
+      return initialState;
     default:
       return state;
   }
@@ -143,5 +145,12 @@ export function startLobby(game) {
   return {
     type: START_LOBBY,
     result: game,
+  };
+}
+
+export function clearLobby() {
+  return {
+    type: CLEAR_LOBBY,
+    result: null,
   };
 }

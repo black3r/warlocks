@@ -65,6 +65,9 @@ export default class Lobby extends Component {
 
   // TODO: iba prvy hrac (Vlastnik lobby) moze zacat hru
   render() {
+    if (!this.props.selectedLobby) {
+      return <Grid />;
+    }
     const enabled = this.props.selectedLobby.players.length && this.props.selectedLobby.players[0] === this.props.user.username;
 
     return (
@@ -79,12 +82,12 @@ export default class Lobby extends Component {
           <Col md={4}>
             <Table striped bordered>
               <thead>
-                <tr>
-                  <th>Player name</th>
-                </tr>
+              <tr>
+                <th>Player name</th>
+              </tr>
               </thead>
               <tbody>
-                { this.props.selectedLobby && this.props.selectedLobby.players.map((player) => <tr><td>{player}</td></tr>) }
+              { this.props.selectedLobby && this.props.selectedLobby.players.map((player) => <tr><td>{player}</td></tr>) }
               </tbody>
             </Table>
           </Col>
