@@ -261,7 +261,7 @@ export default class InGame extends Component {
 
     const playerHitHandler = (data) => {
       for (let i = 0; i < 10; i++) {
-        const distance = (10 - i) * 1.5;
+        const distance = (10 - i) * 3.5;
         const delay = (i + 1) * 100;
         setTimeout(() => {
           this.players[data.pid].x -= data.vector[0] * distance;
