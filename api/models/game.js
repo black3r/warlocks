@@ -8,6 +8,7 @@ const gameSchema = mongoose.Schema({
       player: String,
       moveType: String,
       coordinates: [Number],
+      vector: [Number],
       time: Number,
       attackType: String
     }]

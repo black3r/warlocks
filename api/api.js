@@ -17,6 +17,8 @@ import { getLobbyList } from './actions/getLobbyList';
 import { getLobby } from './actions/getLobby';
 import { createLobby } from './actions/createLobby';
 import { startLobby } from "./actions/startLobby";
+import { gameOver } from "./actions/gameOver";
+import { getMatchHistory } from "./actions/getMatchHistory";
 
 const pretty = new PrettyError();
 const app = express();
@@ -93,6 +95,12 @@ db.once('open', () => {
     getLobbyList().then((data) => res.json(data));
   });
 
+  app.post('/match/list/', (req, res) => {
+    const { username } = req.body;
+    console.log(username);
+    getMatchHistory(username).then((data) => res.json(data));
+  });
+
   app.post('/lobby/get/', (req, res) => {
     const {id} = req.body;
     getLobby(id).then((data) => res.json(data));
@@ -120,6 +128,8 @@ db.once('open', () => {
     const userLobbyMap = {};
     const userGameMap = {};
     const userPlayersMap = {};
+    const gameMoveMap = {};
+    const gameStartMap = {};
 
     io.on('connection', (socket) => {
       socket.emit('news', {msg: `'Hello World!' from server`});
@@ -149,6 +159,8 @@ db.once('open', () => {
             const player = players[pid];
             console.log("Nastavujem hracovi hru:", player, game.msg._id);
             userGameMap[player] = game.msg._id; // we reuse lobby map as game map
+            gameMoveMap[game.msg._id] = [];
+            gameStartMap[game.msg._id] = +(new Date());
             userPlayersMap[player] = players;
             console.log("Idem logovat");
             userSocketMap[player].emit('game started', {
@@ -163,6 +175,14 @@ db.once('open', () => {
         console.log("Someone fired a shot!");
         console.log(data);
         const game = userGameMap[user];
+        gameMoveMap[game].push({
+          player: user,
+          moveType: 'fired a shot',
+          coordinates: player,
+          vector: target,
+          time: +(new Date()) - gameStartMap[game],
+          attackType: '',
+        });
         console.log(game);
         const players = userPlayersMap[user];
 
@@ -188,6 +208,15 @@ db.once('open', () => {
         console.log(data);
         const game = userGameMap[user];
         console.log(game);
+
+        gameMoveMap[game].push({
+          player: user,
+          moveType: 'moved',
+          coordinates: player,
+          vector: target,
+          time: +(new Date()) - gameStartMap[game],
+          attackType: '',
+        });
 
         const players = userPlayersMap[user];
         let playingPid = null;
@@ -218,6 +247,16 @@ db.once('open', () => {
           }
         }
 
+        const game = userGameMap[user];
+        gameMoveMap[game].push({
+          player: user,
+          moveType: 'got hit',
+          coordinates: [],
+          vector: vector,
+          time: +(new Date()) - gameStartMap[game],
+          attackType: '',
+        });
+
         for (let pid = 0; pid < players.length; pid++) {
           const playerName = players[pid];
           console.log("Notifying player: ", playerName);
@@ -240,6 +279,16 @@ db.once('open', () => {
             playingPid = pid;
           }
         }
+
+        const game = userGameMap[user];
+        gameMoveMap[game].push({
+          player: user,
+          moveType: 'dmg',
+          coordinates: [],
+          vector: [],
+          time: +(new Date()) - gameStartMap[game],
+          attackType: '',
+        });
 
         for (let pid = 0; pid < players.length; pid++) {
           const playerName = players[pid];
@@ -264,6 +313,16 @@ db.once('open', () => {
           }
         }
 
+        const game = userGameMap[user];
+        gameMoveMap[game].push({
+          player: user,
+          moveType: 'died',
+          coordinates: [],
+          vector: [],
+          time: +(new Date()) - gameStartMap[game],
+          attackType: '',
+        });
+
         for (let pid = 0; pid < players.length; pid++) {
           const playerName = players[pid];
           console.log("Notifying player: ", playerName);
@@ -272,6 +331,18 @@ db.once('open', () => {
             pid: playingPid
           });
         }
+      });
+
+      socket.on('won', (data) => {
+        const { user } = data;
+        console.log("Game is over!");
+        console.log(data);
+
+        const game = userGameMap[user];
+
+        // No need to notify players, they already know
+        // Just update the info in database
+        gameOver(game, gameMoveMap[game]);
       });
 
       const clearUser = (user, lobby) => {
